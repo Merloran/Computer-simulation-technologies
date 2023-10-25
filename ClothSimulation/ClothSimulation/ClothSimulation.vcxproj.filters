@@ -13,10 +13,75 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\render_stuff">
+      <UniqueIdentifier>{6965a06f-3bcc-4c58-8987-224fc4a90c72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\source">
+      <UniqueIdentifier>{89be62dc-63fd-4b82-aad1-d34d84c639ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClothSimulation.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
+    <ClCompile Include="source\Common\camera.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\display_manager.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Common\handle.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\render_manager.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\pch.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\resource_manager.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Common\shader.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\display_manager.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="source\pch.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="source\resource_manager.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Common\handle.hpp">
+      <Filter>Pliki nagłówkowe\render_stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Common\material.hpp">
+      <Filter>Pliki nagłówkowe\render_stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Common\mesh.hpp">
+      <Filter>Pliki nagłówkowe\render_stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Common\model.hpp">
+      <Filter>Pliki nagłówkowe\render_stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Common\texture.hpp">
+      <Filter>Pliki nagłówkowe\render_stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\types.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="source\render_manager.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Common\camera.hpp">
+      <Filter>Pliki nagłówkowe\render_stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Common\shader.hpp">
+      <Filter>Pliki nagłówkowe\render_stuff</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
