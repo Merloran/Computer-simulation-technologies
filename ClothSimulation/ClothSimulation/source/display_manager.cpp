@@ -22,9 +22,15 @@ void SDisplayManager::startup()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 	window = glfwCreateWindow(windowSize.x, windowSize.y, name.c_str(), nullptr, nullptr);
+
+	if (!window)
+	{
+		SPDLOG_ERROR("Failed create window!");
+		return;
+	}
 
 	glfwMakeContextCurrent(window);
 }
@@ -51,9 +57,24 @@ const glm::ivec2& SDisplayManager::get_window_size()
 	return windowSize;
 }
 
+Float32 SDisplayManager::get_aspect_ratio() const
+{
+	if (windowSize.y == 0)
+	{
+		return 1.0f;
+	}
+
+	return Float32(windowSize.x) / Float32(windowSize.y);
+}
+
 void SDisplayManager::update()
 {
 	glfwPollEvents();
+	glfwGetWindowSize(window, &windowSize.x, &windowSize.y);
+	glfwGetFramebufferSize(window, &framebufferSize.x, &framebufferSize.y);
+	glViewport(0, 0, windowSize.x, windowSize.y);
+	glClearColor(0.31f, 0.22f, 0.16f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void SDisplayManager::close_window()

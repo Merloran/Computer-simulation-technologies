@@ -41,13 +41,20 @@ public:
 
 	Handle<Material> create_material(const Material& material, const std::string& name);
 
-	Model    &get_model_by_name(const std::string& name);
-	Mesh     &get_mesh_by_name(const std::string& name);
-	Mesh     &get_mesh_by_handle(const Handle<Mesh> handle);
+	Model	 &get_model_by_name(const std::string& name);
+	Model	 &get_model_by_handle(const Handle<Model> handle);
+	Mesh	 &get_mesh_by_name(const std::string& name);
+	Mesh	 &get_mesh_by_handle(const Handle<Mesh> handle);
 	Material &get_material_by_name(const std::string& name);
 	Material &get_material_by_handle(const Handle<Material> handle);
-	Texture  &get_texture_by_name(const std::string& name);
-	Texture  &get_texture_by_handle(const Handle<Texture> handle);
+	Material &get_default_material();
+	Texture	 &get_texture_by_name(const std::string& name);
+	Texture	 &get_texture_by_handle(const Handle<Texture> handle);
+
+	const Handle<Model>    &get_model_handle_by_name(const std::string &name);
+	const Handle<Mesh>	   &get_mesh_handle_by_name(const std::string &name);
+	const Handle<Material> &get_material_handle_by_name(const std::string &name);
+	const Handle<Texture>  &get_texture_handle_by_name(const std::string &name);
 
 	const std::vector<Model>    &get_models()    const;
 	const std::vector<Mesh>     &get_meshes()    const;

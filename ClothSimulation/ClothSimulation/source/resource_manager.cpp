@@ -102,21 +102,20 @@ void SResourceManager::generate_opengl_texture(Texture& texture)
 
 void SResourceManager::generate_opengl_model(Model& model)
 {
-	UInt32 tempVBO;
 	for (const Handle<Mesh>& handle : model.meshes)
 	{
 		Mesh& mesh = get_mesh_by_handle(handle);
 
 		glGenVertexArrays(1, &mesh.gpuIds[0]);
 		glGenBuffers(1, &mesh.gpuIds[1]);
-		glGenBuffers(1, &tempVBO);
+		glGenBuffers(1, &mesh.gpuIds[2]);
 
 		glBindVertexArray(mesh.gpuIds[0]);
-		glBindBuffer(GL_ARRAY_BUFFER, tempVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.gpuIds[2]);
 
 		const Int64 positionsSize = mesh.positions.size() * sizeof(glm::vec3);
-		const Int64 normalsSize = mesh.normals.size() * sizeof(glm::vec3);
-		const Int64 uvsSize = mesh.uvs.size() * sizeof(glm::vec2);
+		const Int64 normalsSize	  = mesh.normals.size() * sizeof(glm::vec3);
+		const Int64 uvsSize		  = mesh.uvs.size() * sizeof(glm::vec2);
 
 		glBufferData(GL_ARRAY_BUFFER, positionsSize + normalsSize + uvsSize, nullptr, GL_STATIC_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, positionsSize, mesh.positions.data());
@@ -134,11 +133,7 @@ void SResourceManager::generate_opengl_model(Model& model)
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)positionsSize);
 		// Texture position attribute
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)(positionsSize + normalsSize));
-
-
-		//TODO: check it
-		glDeleteBuffers(1, &tempVBO);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)(positionsSize + normalsSize));
 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -155,7 +150,7 @@ Handle<Model> SResourceManager::load_model(const std::filesystem::path & filePat
 	}
 
 	models.emplace_back();
-	Int64 modelId = models.size() - 1;
+	const Int64 modelId = models.size() - 1;
 	Model &model = models[modelId];
 
 	model.meshes.reserve(gltfMesh.primitives.size());
@@ -167,11 +162,17 @@ Handle<Model> SResourceManager::load_model(const std::filesystem::path & filePat
 		std::string meshName = gltfMesh.name + std::to_string(i);
 		Handle<Mesh> mesh = load_mesh(meshName, primitive, gltfModel);
 		model.meshes.push_back(mesh);
-		Handle<Material> material = load_material(filePath.parent_path(), gltfModel.materials[primitive.material], gltfModel);
+		Handle<Material> material = get_material_handle_by_name("DefaultMaterial");
+		if (primitive.material >= 0)
+		{
+			material = load_material(filePath.parent_path(), 
+									 gltfModel.materials[primitive.material], 
+									 gltfModel);
+		}
 		model.materials.push_back(material);
 	}
 
-	Handle<Model> modelHandle{ modelId };
+	Handle<Model> modelHandle{ Int32(modelId) };
 	nameToIdModels[gltfMesh.name] = modelHandle;
 
 	return modelHandle;
@@ -186,7 +187,7 @@ Handle<Mesh> SResourceManager::load_mesh(const std::string& meshName, tinygltf::
 	}
 
 	meshes.emplace_back();
-	Int64 meshId = meshes.size() - 1;
+	const Int64 meshId = meshes.size() - 1;
 	Mesh &mesh   = meshes[meshes.size() - 1];
 
 	const tinygltf::Accessor& indexesAccessor = gltfModel.accessors[primitive.indices];
@@ -279,7 +280,7 @@ Handle<Mesh> SResourceManager::load_mesh(const std::string& meshName, tinygltf::
 		return Handle<Mesh>::sNone;
 	}
 
-	Handle<Mesh> meshHandle{ meshId };
+	Handle<Mesh> meshHandle{ Int32(meshId) };
 	nameToIdMeshes[meshName] = meshHandle;
 
 	return meshHandle;
@@ -298,10 +299,10 @@ Handle<Material> SResourceManager::load_material(const std::filesystem::path& as
 	Material& material = materials[materialId];
 
 	const Int32 albedoId			  = gltfMaterial.pbrMetallicRoughness.baseColorTexture.index;
-	const Int32 metallicRoughnessId = gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index;
+	const Int32 metallicRoughnessId	  = gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index;
 	const Int32 normalId			  = gltfMaterial.normalTexture.index;
-	const Int32 ambientOcclusionId  = gltfMaterial.occlusionTexture.index;
-	const Int32 emissionId		  = gltfMaterial.emissiveTexture.index;
+	const Int32 ambientOcclusionId    = gltfMaterial.occlusionTexture.index;
+	const Int32 emissionId		      = gltfMaterial.emissiveTexture.index;
 
 	if (albedoId >= 0)
 	{
@@ -344,7 +345,7 @@ Handle<Material> SResourceManager::load_material(const std::filesystem::path& as
 		material.emission = load_texture(assetPath / image.uri, textureName.stem().string(), ETextureType::Emission);
 	}
 
-	Handle<Material> materialHandle{ materialId };
+	Handle<Material> materialHandle{ Int32(materialId) };
 	nameToIdMaterials[gltfMaterial.name] = materialHandle;
 
 	return materialHandle;
@@ -371,7 +372,7 @@ Handle<Texture> SResourceManager::load_texture(const std::filesystem::path& file
 		return Handle<Texture>::sNone;
 	}
 
-	Handle<Texture> textureHandle{ textureId };
+	Handle<Texture> textureHandle{ Int32(textureId) };
 	nameToIdTextures[textureName] = textureHandle;
 
 	return textureHandle;
@@ -380,7 +381,7 @@ Handle<Texture> SResourceManager::load_texture(const std::filesystem::path& file
 Handle<Material> SResourceManager::create_material(const Material& material, const std::string& name)
 {
 	materials.emplace_back(material);
-	Handle<Material> materialHandle{ materials.size() - 1 };
+	Handle<Material> materialHandle{ Int32(materials.size()) - 1 };
 	nameToIdMaterials[name] = materialHandle;
 
 	return materialHandle;
@@ -396,6 +397,16 @@ Model& SResourceManager::get_model_by_name(const std::string& name)
 	}
 
 	return models[iterator->second.id];
+}
+
+Model& SResourceManager::get_model_by_handle(const Handle<Model> handle)
+{
+	if (handle.id >= models.size())
+	{
+		SPDLOG_WARN("Model {} not found, returned default.", handle.id);
+		return models[0];
+	}
+	return models[handle.id];
 }
 
 Mesh& SResourceManager::get_mesh_by_name(const std::string& name)
@@ -442,6 +453,11 @@ Material& SResourceManager::get_material_by_handle(const Handle<Material> handle
 	return materials[handle.id];
 }
 
+Material& SResourceManager::get_default_material()
+{
+	return get_material_by_name("DefaultMaterial");
+}
+
 Texture& SResourceManager::get_texture_by_name(const std::string& name)
 {
 	const auto& iterator = nameToIdTextures.find(name);
@@ -462,6 +478,50 @@ Texture& SResourceManager::get_texture_by_handle(const Handle<Texture> handle)
 		return textures[0];
 	}
 	return textures[handle.id];
+}
+
+const Handle<Model> &SResourceManager::get_model_handle_by_name(const std::string &name)
+{
+	const auto &iterator = nameToIdModels.find(name);
+	if (iterator == nameToIdModels.end())
+	{
+		SPDLOG_WARN("Model handle {} not found, returned none.", name);
+		return Handle<Model>::sNone;
+	}
+	return iterator->second;
+}
+
+const Handle<Mesh> &SResourceManager::get_mesh_handle_by_name(const std::string &name)
+{
+	const auto &iterator = nameToIdMeshes.find(name);
+	if (iterator == nameToIdMeshes.end())
+	{
+		SPDLOG_WARN("Mesh handle {} not found, returned none.", name);
+		return Handle<Mesh>::sNone;
+	}
+	return iterator->second;
+}
+
+const Handle<Material> &SResourceManager::get_material_handle_by_name(const std::string &name)
+{
+	const auto &iterator = nameToIdMaterials.find(name);
+	if (iterator == nameToIdMaterials.end())
+	{
+		SPDLOG_WARN("Material handle {} not found, returned none.", name);
+		return Handle<Material>::sNone;
+	}
+	return iterator->second;
+}
+
+const Handle<Texture>& SResourceManager::get_texture_handle_by_name(const std::string& name)
+{
+	const auto &iterator = nameToIdTextures.find(name);
+	if (iterator == nameToIdTextures.end())
+	{
+		SPDLOG_WARN("Texture handle {} not found, returned none.", name);
+		return Handle<Texture>::sNone;
+	}
+	return iterator->second;
 }
 
 const std::vector<Model>& SResourceManager::get_models() const
@@ -508,6 +568,7 @@ void SResourceManager::shutdown()
 		{
 			glDeleteVertexArrays(1, &mesh.gpuIds[0]);
 			glDeleteBuffers(1, &mesh.gpuIds[1]);
+			glDeleteBuffers(1, &mesh.gpuIds[2]);
 		}
 	}
 	meshes.clear();

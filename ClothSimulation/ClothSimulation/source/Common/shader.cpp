@@ -42,7 +42,7 @@ void Shader::create(const std::string& vertexPath, const std::string& fragmentPa
     }
     catch (std::ifstream::failure& e)
     {
-        SPDLOG_ERROR("ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: %s", e.what());
+        SPDLOG_ERROR("ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: {}", e.what());
         return;
     }
     const char *vertexShaderCode, *fragmentShaderCode, *geometryShaderCode;

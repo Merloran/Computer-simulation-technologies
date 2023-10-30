@@ -10,6 +10,7 @@ public:
 
 	const glm::ivec2& get_framebuffer_size();
 	const glm::ivec2& get_window_size();
+	Float32 get_aspect_ratio() const;
 
 	void update();
 	void close_window();
