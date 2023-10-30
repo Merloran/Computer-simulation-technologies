@@ -160,6 +160,7 @@
     <ClCompile Include="source\Common\handle.cpp" />
     <ClCompile Include="source\Common\shader.cpp" />
     <ClCompile Include="source\display_manager.cpp" />
+    <ClCompile Include="source\mass_point.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.hpp</PrecompiledHeaderFile>
@@ -172,6 +173,7 @@
     </ClCompile>
     <ClCompile Include="source\render_manager.cpp" />
     <ClCompile Include="source\resource_manager.cpp" />
+    <ClCompile Include="source\simulation_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Common\camera.hpp" />
@@ -182,9 +184,11 @@
     <ClInclude Include="source\Common\shader.hpp" />
     <ClInclude Include="source\Common\texture.hpp" />
     <ClInclude Include="source\display_manager.hpp" />
+    <ClInclude Include="source\mass_point.hpp" />
     <ClInclude Include="source\pch.hpp" />
     <ClInclude Include="source\render_manager.hpp" />
     <ClInclude Include="source\resource_manager.hpp" />
+    <ClInclude Include="source\simulation_manager.hpp" />
     <ClInclude Include="source\types.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
