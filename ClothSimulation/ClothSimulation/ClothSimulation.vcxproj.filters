@@ -45,6 +45,12 @@
     <ClCompile Include="source\Common\shader.cpp">
       <Filter>Pliki źródłowe\source</Filter>
     </ClCompile>
+    <ClCompile Include="source\simulation_manager.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\mass_point.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\display_manager.hpp">
@@ -82,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="source\Common\shader.hpp">
       <Filter>Pliki nagłówkowe\render_stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="source\mass_point.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="source\simulation_manager.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

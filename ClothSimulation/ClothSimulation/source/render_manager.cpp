@@ -15,9 +15,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "simulation_manager.hpp"
+
 SRenderManager& SRenderManager::get()
 {
-	static SRenderManager instance;
+	static SRenderManager instance = SRenderManager();
 	return instance;
 }
 
@@ -64,6 +66,7 @@ void SRenderManager::update(Camera &camera, Float32 dT)
 {
 	const SDisplayManager &displayManager = SDisplayManager::get();
 	const SResourceManager &resourceManager = SResourceManager::get();
+	SimulationManager &simulationManager = SimulationManager::get();
 
 	// IMGUI
 	ImGui_ImplOpenGL3_NewFrame();
@@ -85,20 +88,14 @@ void SRenderManager::update(Camera &camera, Float32 dT)
 	diffuse.set_mat4("projection", proj);
 	diffuse.set_mat4("view", view);
 	diffuse.set_mat4("model", model);
-	if (!models.empty())
-	{
-		draw_model(models[0]);
-	}
+	MassPoint* points = simulationManager.get_mass_points();
 	const glm::vec3  origin   = { 0.0f , 0.0f, -5.0f };
-	const Float32    length   = 4.0f;
-	const glm::ivec2 gridSize = { 10, 10 };
-	for (Int32 y = 0; y < gridSize.y; ++y)
+	for (Int32 y = 0; y < SimulationManager::rows; ++y)
 	{
-		for (Int32 x = 0; x < gridSize.x; ++x)
+		for (Int32 x = 0; x < SimulationManager::cols; ++x)
 		{
-			model = glm::translate(glm::mat4(1.0f), origin + glm::vec3(length * Float32(x),
-																	   length * Float32(y),
-																	   0.0f));
+			model = glm::translate(glm::mat4(1.0f), 
+								   origin + points[x + y * SimulationManager::cols].getPosition());
 			model = glm::scale(model, glm::vec3(0.5));
 			diffuse.set_mat4("model", model);
 			draw_sphere(glm::vec3(1.0f));

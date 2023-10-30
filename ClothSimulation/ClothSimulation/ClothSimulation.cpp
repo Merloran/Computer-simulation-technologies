@@ -1,31 +1,25 @@
 ﻿#include <GLFW/glfw3.h>
 
+#include "source/simulation_manager.hpp"
 #include "source/display_manager.hpp"
 #include "source/resource_manager.hpp"
 #include "source/render_manager.hpp"
 #include "source/Common/camera.hpp"
-#include "source/Common/shader.hpp"
-#include "source/Common/mesh.hpp"
 #include "source/Common/model.hpp"
 #include "source/Common/handle.hpp"
+#include "source/Common/mesh.hpp"
 
 int main()
 {
 	SDisplayManager &displayManager = SDisplayManager::get();
 	SResourceManager &resourceManager = SResourceManager::get();
 	SRenderManager &renderManager = SRenderManager::get();
+	SimulationManager &simulationManager = SimulationManager::get();
 
 	displayManager.startup();
 	resourceManager.startup();
 	renderManager.startup();
-
-
-	resourceManager.load_gltf_asset("Resources/Assets/Flag/Flag.gltf");
-	std::vector<Model> models = resourceManager.get_models();
-	if (!models.empty())
-	{
-		resourceManager.generate_opengl_model(models[0]);
-	}
+	simulationManager.startup();
 
 	Camera camera;
 	camera.initialize({ 20.0f, 20.0f, 40.0f });
@@ -38,9 +32,11 @@ int main()
 		lastFrame = currentFrame;
 
 		displayManager.update();
+		simulationManager.update(deltaTimeMs * 0.1f);
 		renderManager.update(camera, deltaTimeMs);
 	}
 
+	simulationManager.shutdown();
 	renderManager.shutdown();
 	resourceManager.shutdown();
 	displayManager.shutdown();

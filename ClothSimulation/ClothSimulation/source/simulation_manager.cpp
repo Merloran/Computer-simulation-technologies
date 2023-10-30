@@ -1,12 +1,31 @@
-#include "pch.hpp"
 #include "simulation_manager.hpp"
-#include <glm/gtx/norm.hpp>
+
+SimulationManager& SimulationManager::get()
+{
+	static SimulationManager instance;
+	return instance;
+}
 
 void SimulationManager::startup()
 {
+	for (Int32 i = 0; i < numberOfMasses; ++i)
+	{
+		Int32 x = i % cols, y = Int32(i / rows);
+		const Float32 initialLength = 2.0f;
+		massPoints[i] = MassPoint(1.0f, glm::vec3(initialLength * Float32(x),
+												  initialLength * Float32(y),
+												  0.0f),
+										glm::vec3(0.0f),
+									    glm::vec3(0.0f));
+	} // checked
+	for (Int32 i = 0; i < numberOfMasses; ++i)
+	{
+		Int32 x = i % cols, y = Int32(i / rows);
+		massPoints[i].setSprings(x, y, cols, rows);
+	} // checked
 }
 
-void SimulationManager::update()
+void SimulationManager::update(Float32 dT)
 {
 	
 	for (int i = 0; i < numberOfMasses; i++)
@@ -20,24 +39,23 @@ void SimulationManager::update()
 	{
 		internalForces[i] = getInternalForce(i);
 		externalForces[i] = getExternalForce(i);
-	}
+	} //checked?
 
 	int iter = 0;
-	float micro = 1.f;
-	float tiemstep = 0.2f;
+	float micro = 0.1f;
 
 	float variation = 0.f;
 
-	while (variation > variationThreshold || (iter < minIterations)) {
+	while (iter < minIterations) { //variation > variationThreshold || 
 
 		variation = 0.f;
 		glm::vec3 varVector = glm::vec3(0.0f);
 
 		for (int i = 0; i < numberOfMasses; i++)
 		{
-			accelerations[i] = 1 / micro * (internalForces[i] + externalForces[i]);
-			velocities[i] = velocities[i] + accelerations[i] * tiemstep;
-			positions[i] = positions[i] + velocities[i] * tiemstep;
+			accelerations[i] = 1.0f / micro * (internalForces[i] + externalForces[i]);
+			velocities[i] = velocities[i] + accelerations[i] * dT;
+			positions[i] = positions[i] + velocities[i] * dT;
 			varVector += positions[i];
 		}
 		varVector /= numberOfMasses;
@@ -54,6 +72,11 @@ void SimulationManager::update()
 	updatePositions();
 }
 
+MassPoint* SimulationManager::get_mass_points()
+{
+	return massPoints;
+}
+
 void SimulationManager::shutdown()
 {
 }
@@ -64,19 +87,16 @@ glm::vec3 SimulationManager::getInternalForce(int index)
 
 	std::vector<Spring> springs = massPoints[index].getSprings();
 
-	float stiffness = 1;
+	float stiffness = 10.0f;
 
-	for(Spring spring : springs)
+	for(Spring& spring : springs)
 	{
-		glm::vec3 pointA = positions[spring.indexA];
+		glm::vec3 pointA = positions[index];
 		glm::vec3 pointB = positions[spring.indexB];
 
 		glm::vec3 l = pointB - pointA;
-		float springLength = glm::length(pointA - pointB);
 
-		internalForce += stiffness * (
-			l - (spring.restLength * glm::normalize(l))
-			);
+		internalForce += stiffness * (l - (spring.restLength * glm::normalize(l)));
 	}
 
 	return internalForce;
@@ -103,6 +123,10 @@ void SimulationManager::updatePositions()
 {
 	for (int i = 0; i < 100; i++)
 	{
+		if (i == 0 || i == 9)
+		{
+			continue;
+		}
 		massPoints[i].setPosition(positions[i]);
 		massPoints[i].setVelocity(velocities[i]);
 		massPoints[i].setAcceleration(accelerations[i]);

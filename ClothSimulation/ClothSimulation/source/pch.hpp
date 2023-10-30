@@ -9,6 +9,7 @@
 //Third party
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/norm.hpp>
 #include <spdlog/spdlog.h>
 
 #include "types.hpp"
