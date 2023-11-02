@@ -3,7 +3,7 @@
 void Camera::initialize(const glm::vec3 &position)
 {
 	this->position = position;
-	yaw = -90.0f;
+	yaw = -45.0f;
 	pitch = 0.0f;
 
 	update_camera_vectors();

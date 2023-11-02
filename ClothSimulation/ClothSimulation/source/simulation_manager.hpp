@@ -8,14 +8,14 @@ public:
 	SimulationManager(SimulationManager&) = delete;
 	static SimulationManager& get();
 
-	static constexpr int rows = 10;
-	static constexpr int cols = 10;
-
 	void startup();
 
 	void update(Float32 dT);
-
-	MassPoint *get_mass_points();
+	
+	const std::vector<MassPoint>& get_mass_points() const;
+	const std::vector<Spring>& get_springs() const;
+	Float32 get_initial_length() const;
+	void show_gui();
 
 	void shutdown();
 
@@ -24,22 +24,32 @@ private:
 	SimulationManager() = default;
 	~SimulationManager() = default;
 
-	static constexpr int numberOfMasses = rows * cols;
-	MassPoint massPoints[numberOfMasses];
+	glm::ivec2 gridSize = { 10, 10 };
+	glm::ivec2 newGridSize = gridSize;
+	std::vector<MassPoint>	massPoints;
+	std::vector<Spring>		springs;
+	std::vector<glm::vec3>	internalForces;
+	std::vector<glm::vec3>	externalForces;
 
-	glm::vec3 positions[numberOfMasses];
-	glm::vec3 velocities[numberOfMasses];
-	glm::vec3 accelerations[numberOfMasses];
+	void process_mass_point(Int32 x, Int32 y);
 
-	glm::vec3 internalForces[numberOfMasses];
-	glm::vec3 externalForces[numberOfMasses];
-
+	int minIterations = 1;
 	float variationThreshold = 0.01f;
-	int minIterations = 5;
+	glm::vec3 gravity = { 0.0f, -9.81f, 0.0f };
+	glm::vec3 fluidVelocity = { 0.0f, 0.0f, 30.0f };
+	Float32 stiffness = 100.0f;
+	Float32 mass = 1.0f;
+	Float32 viscosity = 0.1f;
+	Float32 damping = 0.1f;
+	Float32 initialLength = 2.0f;
+	Float32 newInitialLength = initialLength;
+	Float32 maximumTimeStep;
+	bool isSimulating = false;
+	bool shouldReset = false;
 
-	glm::vec3 getInternalForce(int index);
-	glm::vec3 getExternalForce(int index);
 
-	void updatePositions();
+	void compute_internal_force(Int32 springIndex);
+	void compute_external_force(Int32 massIndex);
+	void reset_forces();
 };
 

@@ -65,7 +65,6 @@ void SRenderManager::startup()
 void SRenderManager::update(Camera &camera, Float32 dT)
 {
 	const SDisplayManager &displayManager = SDisplayManager::get();
-	const SResourceManager &resourceManager = SResourceManager::get();
 	SimulationManager &simulationManager = SimulationManager::get();
 
 	// IMGUI
@@ -74,36 +73,37 @@ void SRenderManager::update(Camera &camera, Float32 dT)
 	ImGui::NewFrame();
 
 	camera_gui(camera);
+	simulationManager.show_gui();
 
 	ImGui::Render();
 
 	glfwMakeContextCurrent(&displayManager.get_window());
-
-	const std::vector<Model>& models = resourceManager.get_models();
+	
 	diffuse.use();
 	glm::mat4 view = camera.get_view();
 	glm::mat4 proj = camera.get_projection(displayManager.get_aspect_ratio());
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
 	diffuse.set_mat4("projection", proj);
 	diffuse.set_mat4("view", view);
-	diffuse.set_mat4("model", model);
-	MassPoint* points = simulationManager.get_mass_points();
-	const glm::vec3  origin   = { 0.0f , 0.0f, -5.0f };
-	for (Int32 y = 0; y < SimulationManager::rows; ++y)
-	{
-		for (Int32 x = 0; x < SimulationManager::cols; ++x)
-		{
-			model = glm::translate(glm::mat4(1.0f), 
-								   origin + points[x + y * SimulationManager::cols].getPosition());
-			model = glm::scale(model, glm::vec3(0.5));
-			diffuse.set_mat4("model", model);
-			draw_sphere(glm::vec3(1.0f));
-		}
-	}
-	add_line(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f, 10.0f, -5.0f));
+	const glm::vec3  origin   = { 10.0f , 30.0f, -5.0f };
+	const std::vector<MassPoint>& massPoints = simulationManager.get_mass_points();
+	const std::vector<Spring>& springs = simulationManager.get_springs();
 
-	diffuse.set_mat4("model", glm::mat4(1.0f));
+	for (const MassPoint& massPoint : massPoints)
+	{
+		model = glm::translate(glm::mat4(1.0f),origin + massPoint.position);
+		model = glm::scale(model, glm::vec3(simulationManager.get_initial_length() * 0.25f));
+		diffuse.set_mat4("model", model);
+		draw_sphere(glm::vec3(1.0f));
+	}
+	
+	for (const Spring& spring : springs)
+	{
+		add_line(massPoints[spring.indexA].position,
+				 massPoints[spring.indexB].position);
+	}
+
+	diffuse.set_mat4("model", glm::translate(glm::mat4(1.0f), origin));
 	draw_lines(glm::vec3(1.0f));
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	glfwSwapBuffers(&displayManager.get_window());

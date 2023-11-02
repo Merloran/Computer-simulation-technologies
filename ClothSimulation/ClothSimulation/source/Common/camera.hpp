@@ -25,6 +25,6 @@ private:
 	glm::vec3 forward  { 0.0f, 0.0f, -1.0f },
 			  up       { 0.0f, 1.0f, 0.0f },
 			  right    { 1.0, 0.0f, 0.0f };
-	Float32 sensitivity { 1.0f }, speed { 0.0f }, near { 0.001f }, far { 1000.0f }, fov { 70.0f };
+	Float32 sensitivity { 1.0f }, speed { 0.0f }, near { 0.001f }, far { 5000.0f }, fov { 70.0f };
 };
 

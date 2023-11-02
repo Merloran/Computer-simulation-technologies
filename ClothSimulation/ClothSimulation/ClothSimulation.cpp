@@ -22,7 +22,7 @@ int main()
 	simulationManager.startup();
 
 	Camera camera;
-	camera.initialize({ 20.0f, 20.0f, 40.0f });
+	camera.initialize({ -20.0f, 20.0f, 25.0f });
 	Float32 lastFrame = 0.0f;
 	Float32 deltaTimeMs = 0.0f;
 	while(!displayManager.should_window_close())
@@ -32,7 +32,7 @@ int main()
 		lastFrame = currentFrame;
 
 		displayManager.update();
-		simulationManager.update(deltaTimeMs * 0.1f);
+		simulationManager.update(deltaTimeMs);
 		renderManager.update(camera, deltaTimeMs);
 	}
 
