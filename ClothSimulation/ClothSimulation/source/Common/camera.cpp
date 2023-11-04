@@ -9,19 +9,19 @@ void Camera::initialize(const glm::vec3 &position)
 	update_camera_vectors();
 }
 
-void Camera::move_forward(Float32 value)
+void Camera::move_forward(Float32 dt)
 {
-	position += forward * value * speed;
+	position += forward * dt * speed;
 }
 
-void Camera::move_right(Float32 value)
+void Camera::move_right(Float32 dt)
 {
-	position += right * value * speed;
+	position += right * dt * speed;
 }
 
-void Camera::move_up(Float32 value)
+void Camera::move_up(Float32 dt)
 {
-	position += glm::vec3(0.0f, 1.0f, 0.0f) * value * speed;
+	position += glm::vec3(0.0f, 1.0f, 0.0f) * dt * speed;
 }
 
 void Camera::rotate(Float32 xOffset, Float32 yOffset)

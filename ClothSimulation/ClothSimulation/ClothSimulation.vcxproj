@@ -127,7 +127,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <ForcedIncludeFiles>pch.hpp</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,6 +160,7 @@
     <ClCompile Include="source\Common\handle.cpp" />
     <ClCompile Include="source\Common\shader.cpp" />
     <ClCompile Include="source\display_manager.cpp" />
+    <ClCompile Include="source\input_manager.cpp" />
     <ClCompile Include="source\mass_point.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -184,6 +185,8 @@
     <ClInclude Include="source\Common\shader.hpp" />
     <ClInclude Include="source\Common\texture.hpp" />
     <ClInclude Include="source\display_manager.hpp" />
+    <ClInclude Include="source\input_key.hpp" />
+    <ClInclude Include="source\input_manager.hpp" />
     <ClInclude Include="source\mass_point.hpp" />
     <ClInclude Include="source\pch.hpp" />
     <ClInclude Include="source\render_manager.hpp" />

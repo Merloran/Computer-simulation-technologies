@@ -17,6 +17,8 @@ public:
 	bool should_window_close();
 	struct GLFWwindow& get_window() const;
 
+	void capture_mouse(bool capture) const;
+
 	void shutdown();
 
 private:

@@ -98,6 +98,11 @@ GLFWwindow& SDisplayManager::get_window() const
 	return *window;
 }
 
+void SDisplayManager::capture_mouse(bool capture) const
+{
+	glfwSetInputMode(window, GLFW_CURSOR, capture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+}
+
 void SDisplayManager::shutdown()
 {
 	SPDLOG_INFO("Display Manager shutdown.");

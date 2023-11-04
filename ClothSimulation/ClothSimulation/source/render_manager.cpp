@@ -312,11 +312,7 @@ void SRenderManager::shutdown()
 void SRenderManager::camera_gui(Camera &camera)
 {
 	ImGui::Begin("Camera settings");
-	
-	ImGui::DragFloat3("Position", &camera.position[0], 0.1f);
-	ImGui::SliderFloat("Pitch", &camera.pitch, -89.0f, 89.0f);
-	ImGui::SliderFloat("Yaw", &camera.yaw, -180.0f, 180.0f);
-
+	ImGui::DragFloat("Sensitivity", &camera.sensitivity, 0.2f, 0.f, 10.0f);
+	ImGui::DragFloat("Speed", &camera.speed, 1.0f, 0.f, 100.0f);
 	ImGui::End();
-	camera.update_camera_vectors();
 }

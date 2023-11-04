@@ -51,6 +51,9 @@
     <ClCompile Include="source\mass_point.cpp">
       <Filter>Pliki źródłowe\source</Filter>
     </ClCompile>
+    <ClCompile Include="source\input_manager.cpp">
+      <Filter>Pliki źródłowe\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\display_manager.hpp">
@@ -93,6 +96,12 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="source\simulation_manager.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="source\input_manager.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="source\input_key.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
