@@ -83,19 +83,18 @@ void SRenderManager::update(Camera &camera, Float32 dT)
 	glm::mat4 view = camera.get_view();
 	glm::mat4 proj = camera.get_projection(displayManager.get_aspect_ratio());
 	glm::mat4 model = glm::mat4(1.0f);
-	diffuse.set_mat4("projection", proj);
-	diffuse.set_mat4("view", view);
+	diffuse.set_mat4("viewProjection", proj * view);
 	const glm::vec3  origin   = { 10.0f , 30.0f, -5.0f };
 	const std::vector<MassPoint>& massPoints = simulationManager.get_mass_points();
 	const std::vector<Spring>& springs = simulationManager.get_springs();
 
-	for (const MassPoint& massPoint : massPoints)
-	{
-		model = glm::translate(glm::mat4(1.0f),origin + massPoint.position);
-		model = glm::scale(model, glm::vec3(simulationManager.get_initial_length() * 0.25f));
-		diffuse.set_mat4("model", model);
-		draw_sphere(glm::vec3(1.0f));
-	}
+	// for (const MassPoint& massPoint : massPoints)
+	// {
+	// 	model = glm::translate(glm::mat4(1.0f),origin + massPoint.position);
+	// 	model = glm::scale(model, glm::vec3(simulationManager.get_initial_length() * 0.25f));
+	// 	diffuse.set_mat4("model", model);
+	// 	draw_sphere(glm::vec3(1.0f));
+	// }
 	
 	for (const Spring& spring : springs)
 	{
@@ -312,7 +311,7 @@ void SRenderManager::shutdown()
 void SRenderManager::camera_gui(Camera &camera)
 {
 	ImGui::Begin("Camera settings");
-	ImGui::DragFloat("Sensitivity", &camera.sensitivity, 0.2f, 0.f, 10.0f);
+	ImGui::DragFloat("Sensitivity", &camera.sensitivity, 0.2f, 0.f, 100.0f);
 	ImGui::DragFloat("Speed", &camera.speed, 1.0f, 0.f, 100.0f);
 	ImGui::End();
 }

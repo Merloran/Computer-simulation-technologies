@@ -10,7 +10,7 @@ SimulationManager& SimulationManager::get()
 
 void SimulationManager::startup()
 {
-	maximumTimeStep = glm::pi<Float32>() * glm::sqrt(mass / stiffness);
+	maximumTimeStep = glm::pi<Float32>() * glm::sqrt(mass / stiffness) * 0.1f;
 	initialLength = newInitialLength;
 	gridSize = newGridSize;
 	const Int32 numberOfMasses = glm::max(gridSize.x * gridSize.y, 0);
@@ -35,7 +35,8 @@ void SimulationManager::startup()
 		}
 	}
 	massPoints[0].isSimulated = false;
-	massPoints[gridSize.x - 1].isSimulated = false;
+	massPoints[gridSize.x * Int32(gridSize.y * 0.5)].isSimulated = false;
+	massPoints[gridSize.x * (gridSize.y - 1)].isSimulated = false;
 
 	for (Int32 y = 0; y < gridSize.y; ++y)
 	{
@@ -50,7 +51,7 @@ void SimulationManager::startup()
 
 void SimulationManager::update(Float32 dT)
 {
-	dT = glm::min(dT, maximumTimeStep * 0.1f);
+	dT = glm::min(dT, maximumTimeStep); //0.001f;
 	if (shouldReset)
 	{
 		shutdown();
@@ -72,9 +73,10 @@ void SimulationManager::update(Float32 dT)
 		compute_external_force(i);
 	}
 
-	float variation = 0.f;
-	for (Int32 i = 0; i < minIterations || false; ++i) //variation > variationThreshold || 
+	float variation = 0.f, oldVariation = variation;
+	for (Int32 i = 0; i < minIterations; ++i) //|| glm::abs(variation - oldVariation) > variationThreshold
 	{
+		oldVariation = variation;
 		variation = 0.f;
 		glm::vec3 varVector = glm::vec3(0.0f);
 
@@ -85,19 +87,19 @@ void SimulationManager::update(Float32 dT)
 			{
 				continue;
 			}
-			massPoint.acceleration = 1.0f / massPoint.mass * (internalForces[j] + externalForces[j]);
+			massPoint.acceleration = (internalForces[j] + externalForces[j]) / massPoint.mass;
 			massPoint.velocity += massPoint.acceleration * dT;
 			massPoint.position += massPoint.velocity * dT;
-			varVector += massPoint.position;
+			// varVector += massPoint.position;
 		}
-		
-		varVector /= massPoints.size();
-
-		for (Int32 j = 0; j < massPoints.size(); j++)
-		{
-			variation += glm::length2(massPoints[j].position - varVector);
-		}
-		variation /= massPoints.size();
+		// varVector /= massPoints.size();
+		//
+		// for (Int32 j = 0; j < massPoints.size(); j++)
+		// {
+		// 	variation += glm::length2(massPoints[j].position - varVector);
+		// }
+		// variation = glm::sqrt(variation);
+		// variation /= massPoints.size();
 	}
 }
 
@@ -125,14 +127,13 @@ void SimulationManager::show_gui()
 	ImGui::DragFloat("Stiffness", &stiffness, 0.1f, 1.0f, 1000.0f, "%.1f");
 	ImGui::DragFloat("Mass", &mass, 0.001f, 0.001f, 10.0f, "%.3f");
 	ImGui::DragFloat("Initial Length", &newInitialLength, 0.1f, 0.1f, 10.0f, "%.1f");
-	ImGui::DragFloat("Damping", &damping, 0.01f, 0.01f, 1.0f, "%.2f");
+	ImGui::DragFloat("Damping", &damping, 0.01f, 0.01f, 10.0f, "%.2f");
 	ImGui::DragFloat("Viscosity", &viscosity, 0.01f, 0.0f, 2.0f, "%.2f");
 	ImGui::DragInt2("Grid Size", &newGridSize[0], 1, 1, 100);
 
 	shouldReset = ImGui::Button("Reset");
 	ImGui::Checkbox("Simulate", &isSimulating);
-
-
+	ImGui::Text("FPS: %f, %fms", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 	ImGui::End();
 }
 
@@ -219,11 +220,18 @@ void SimulationManager::compute_internal_force(Int32 springIndex)
 void SimulationManager::compute_external_force(Int32 massIndex)
 {
 	MassPoint &massPoint = massPoints[massIndex];
-	glm::vec3 unitNormal = glm::vec3(0.0f, 0.0f, 1.0f);
+	if (glm::length2(fluidVelocity) > glm::epsilon<Float32>())
+	{
+		massPoint.normal = -glm::normalize(fluidVelocity);
+	}
 
-	externalForces[massIndex] = massPoint.mass * gravity
-	- damping * massPoint.velocity
-	+ (viscosity * glm::dot(unitNormal,fluidVelocity - massPoint.velocity)) * unitNormal;
+	const glm::vec3 gravityForce = massPoint.mass * gravity;
+	const glm::vec3 dampingForce = -damping * massPoint.velocity;
+	const glm::vec3 fluidForce   = viscosity
+							     * glm::dot(massPoint.normal, fluidVelocity - massPoint.velocity)
+							     * massPoint.normal;
+
+	externalForces[massIndex] = gravityForce + dampingForce + fluidForce;
 }
 
 void SimulationManager::reset_forces()
@@ -231,5 +239,69 @@ void SimulationManager::reset_forces()
 	for (glm::vec3& force : internalForces)
 	{
 		force = { 0.0f, 0.0f, 0.0f };
+	}
+}
+
+
+//		B
+//      *
+//     /|
+//    / |
+//   /  |A
+// C*---*---*C
+//      |  /
+//      | /
+//      |/
+//      *
+//		B
+void SimulationManager::update_normals()
+{
+	for (MassPoint& massPoint : massPoints)
+	{
+		massPoint.normal = glm::vec3(0.0f);
+	}
+
+	for (Int32 y = 0; y < gridSize.y; ++y)
+	{
+		for (Int32 x = 0; x < gridSize.x; ++x)
+		{
+			const Int32 indexA = y * gridSize.x + x;
+			if (x - 1 >= 0 && y - 1 >= 0) // Upper triangle
+			{
+				const Int32 indexB = (y - 1) * gridSize.x + x;
+				const Int32 indexC = y * gridSize.x + x - 1;
+				MassPoint &massA = massPoints[indexA];
+				MassPoint &massB = massPoints[indexB];
+				MassPoint &massC = massPoints[indexC];
+				const glm::vec3 ba = massB.position - massA.position;
+				const glm::vec3 ca = massC.position - massA.position;
+				const glm::vec3 normal = glm::normalize(glm::cross(ba, ca));
+
+				massA.normal += normal;
+				massB.normal += normal;
+				massC.normal += normal;
+			}
+
+			if (x + 1 < gridSize.x && y + 1 < gridSize.y) // Lower triangle
+			{
+				const Int32 indexB = (y + 1) * gridSize.x + x;
+				const Int32 indexC = y * gridSize.x + x + 1;
+				MassPoint &massA = massPoints[indexA];
+				MassPoint &massB = massPoints[indexB];
+				MassPoint &massC = massPoints[indexC];
+				const glm::vec3 ba = massB.position - massA.position;
+				const glm::vec3 ca = massC.position - massA.position;
+				const glm::vec3 normal = glm::cross(ba, ca);
+
+				massA.normal += normal;
+				massB.normal += normal;
+				massC.normal += normal;
+			}
+		}
+	}
+
+	for (MassPoint &massPoint : massPoints)
+	{
+		massPoint.normal = glm::normalize(massPoint.normal);
 	}
 }

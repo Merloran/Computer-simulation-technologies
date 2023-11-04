@@ -19,11 +19,12 @@ struct MassPoint
 {
 	float mass;
 	glm::vec3 position;
+	glm::vec3 normal;
 	glm::vec3 velocity;
 	glm::vec3 acceleration;
 	bool isSimulated;
 
-	MassPoint(float mass, glm::vec3 position);
+	MassPoint(float mass, const glm::vec3& position, const glm::vec3& normal = glm::vec3(0.0f, 0.0f, 1.0f));
 	MassPoint() = default;
 	~MassPoint() = default;
 };
