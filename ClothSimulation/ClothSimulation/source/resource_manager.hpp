@@ -29,17 +29,19 @@ public:
 	void startup();
 
 	void load_gltf_asset(const std::string& filePath);
-	void load_gltf_asset(const std::filesystem::path& filePath);
 
 	void generate_opengl_texture(Texture& texture);
 	void generate_opengl_model(Model& model);
+	void update_opengl_model(Model& model);
 
 	Handle<Model>    load_model(const std::filesystem::path & filePath, tinygltf::Mesh& gltfMesh, tinygltf::Model& gltfModel);
 	Handle<Mesh>     load_mesh(const std::string& meshName, tinygltf::Primitive& primitive, tinygltf::Model& gltfModel);
 	Handle<Material> load_material(const std::filesystem::path& assetPath, tinygltf::Material& gltfMaterial, tinygltf::Model& gltfModel);
 	Handle<Texture>  load_texture(const std::filesystem::path& filePath, const std::string& textureName, ETextureType type);
 
-	Handle<Material> create_material(const Material& material, const std::string& name);
+	Handle<Material> create_material(Material& material, const std::string& name);
+	Handle<Model> create_model(const Model& model, const std::string& name);
+	Handle<Mesh> create_mesh(const std::string& name);
 
 	Model	 &get_model_by_name(const std::string& name);
 	Model	 &get_model_by_handle(const Handle<Model> handle);
@@ -88,6 +90,7 @@ protected:
 	}
 
 private:
+	void load_gltf_asset(const std::filesystem::path &filePath);
 	SResourceManager() = default;
 
 	std::unordered_map<std::string, Handle<Model>> nameToIdModels;

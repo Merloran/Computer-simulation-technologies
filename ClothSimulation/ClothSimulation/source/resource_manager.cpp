@@ -66,24 +66,24 @@ void SResourceManager::generate_opengl_texture(Texture& texture)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 
 				     0, 
-					 GL_RGB16F, 
+					 GL_RGB, 
 					 texture.size.x, 
 					 texture.size.y,
 					 0, 
 					 GL_RGB,
-					 GL_FLOAT,
+					 GL_UNSIGNED_BYTE,
 					 texture.data);
 	}
 	else if (texture.channels == 4)
 	{
 		glTexImage2D(GL_TEXTURE_2D,
 					 0,
-					 GL_RGBA16F,
+					 GL_RGBA,
 					 texture.size.x,
 					 texture.size.y,
 					 0,
 					 GL_RGBA,
-					 GL_FLOAT,
+					 GL_UNSIGNED_BYTE,
 					 texture.data);
 	} else {
 		SPDLOG_WARN("Not supported count of channels: {}", texture.channels);
@@ -94,8 +94,8 @@ void SResourceManager::generate_opengl_texture(Texture& texture)
 	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -138,6 +138,23 @@ void SResourceManager::generate_opengl_model(Model& model)
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+}
+
+void SResourceManager::update_opengl_model(Model& model)
+{
+	for (const Handle<Mesh> &handle : model.meshes)
+	{
+		Mesh &mesh = get_mesh_by_handle(handle);
+
+		const Int64 positionsSize = mesh.positions.size() * sizeof(glm::vec3);
+		const Int64 normalsSize = mesh.normals.size() * sizeof(glm::vec3);
+
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.gpuIds[2]);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, positionsSize, mesh.positions.data());
+		glBufferSubData(GL_ARRAY_BUFFER, positionsSize, normalsSize, mesh.normals.data());
+		
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }
 
@@ -361,8 +378,8 @@ Handle<Texture> SResourceManager::load_texture(const std::filesystem::path& file
 
 	textures.emplace_back();
 	Int64 textureId = textures.size() - 1;
-
 	Texture& texture = textures[textureId];
+
 	texture.data = stbi_load(filePath.string().c_str(), &texture.size.x, &texture.size.y, &texture.channels, 0);
 	texture.type = type;
 	if (!texture.data)
@@ -378,13 +395,46 @@ Handle<Texture> SResourceManager::load_texture(const std::filesystem::path& file
 	return textureHandle;
 }
 
-Handle<Material> SResourceManager::create_material(const Material& material, const std::string& name)
+Handle<Material> SResourceManager::create_material(Material& material, const std::string& name)
 {
+	if (nameToIdMaterials.contains(name))
+	{
+		SPDLOG_ERROR("Material with name {} is already exist.", name);
+		return Handle<Material>::sNone;
+	}
 	materials.emplace_back(material);
 	Handle<Material> materialHandle{ Int32(materials.size()) - 1 };
 	nameToIdMaterials[name] = materialHandle;
 
 	return materialHandle;
+}
+
+Handle<Model> SResourceManager::create_model(const Model &model, const std::string& name)
+{
+	if (nameToIdModels.contains(name))
+	{
+		SPDLOG_ERROR("Model with name {} is already exist.", name);
+		return Handle<Model>::sNone;
+	}
+	models.emplace_back(model);
+	Handle<Model> modelHandle{ Int32(models.size()) - 1 };
+	nameToIdModels[name] = modelHandle;
+
+	return modelHandle;
+}
+
+Handle<Mesh> SResourceManager::create_mesh(const std::string& name)
+{
+	if (nameToIdMeshes.contains(name))
+	{
+		SPDLOG_ERROR("Mesh with name {} is already exist.", name);
+		return Handle<Mesh>::sNone;
+	}
+	meshes.emplace_back();
+	Handle<Mesh> meshHandle{ Int32(meshes.size()) - 1 };
+	nameToIdMeshes[name] = meshHandle;
+
+	return meshHandle;
 }
 
 Model& SResourceManager::get_model_by_name(const std::string& name)
@@ -548,13 +598,15 @@ void SResourceManager::shutdown()
 {
 	SPDLOG_INFO("Resource Manager shutdown.");
 	nameToIdTextures.clear();
-	for (const Texture& texture : textures)
+	for (Texture& texture : textures)
 	{
 		if (texture.gpuId)
 		{
 			glDeleteTextures(1, &texture.gpuId);
+			texture.gpuId = 0;
 		}
 		stbi_image_free(texture.data);
+		texture.type = ETextureType::None;
 	}
 	textures.clear();
 
@@ -562,13 +614,15 @@ void SResourceManager::shutdown()
 	materials.clear();
 
 	nameToIdMeshes.clear();
-	for (const Mesh& mesh : meshes)
+	for (Mesh& mesh : meshes)
 	{
 		if (mesh.gpuIds[0])
 		{
 			glDeleteVertexArrays(1, &mesh.gpuIds[0]);
-			glDeleteBuffers(1, &mesh.gpuIds[1]);
-			glDeleteBuffers(1, &mesh.gpuIds[2]);
+			mesh.gpuIds[0] = 0;
+			glDeleteBuffers(2, &mesh.gpuIds[1]);
+			mesh.gpuIds[1] = 0;
+			mesh.gpuIds[2] = 0;
 		}
 	}
 	meshes.clear();

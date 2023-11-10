@@ -31,7 +31,6 @@ void SDisplayManager::startup()
 		SPDLOG_ERROR("Failed create window!");
 		return;
 	}
-
 	glfwMakeContextCurrent(window);
 }
 

@@ -9,9 +9,9 @@ public:
 
 	void startup();
 
-	void update(class Camera& camera, Float32 dT);
+	void update(class Camera& camera);
 
-	void draw_model(const struct Model& model);
+	void draw_model(const struct Model& model, Shader& shader);
 	void draw_sphere(const glm::vec3 &color);
 	void add_line(const glm::vec3 &begin, const glm::vec3 &end);
 	void draw_lines(const glm::vec3 &color);

@@ -16,6 +16,7 @@
 #include <GLFW/glfw3.h>
 
 #include "simulation_manager.hpp"
+#include "Common/cloth_data.hpp"
 
 SRenderManager& SRenderManager::get()
 {
@@ -57,15 +58,16 @@ void SRenderManager::startup()
 	normals.create("Resources/Shaders/Normals.vert",
 				  "Resources/Shaders/Normals.frag",
 				  "Resources/Shaders/Normals.geom");
-	glEnable(GL_CULL_FACE);
+	// glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 }
 
-void SRenderManager::update(Camera &camera, Float32 dT)
+void SRenderManager::update(Camera &camera)
 {
 	const SDisplayManager &displayManager = SDisplayManager::get();
 	SimulationManager &simulationManager = SimulationManager::get();
+	SResourceManager &resourceManager = SResourceManager::get();
 
 	// IMGUI
 	ImGui_ImplOpenGL3_NewFrame();
@@ -84,31 +86,30 @@ void SRenderManager::update(Camera &camera, Float32 dT)
 	glm::mat4 proj = camera.get_projection(displayManager.get_aspect_ratio());
 	glm::mat4 model = glm::mat4(1.0f);
 	diffuse.set_mat4("viewProjection", proj * view);
+	diffuse.set_vec3("cameraPosition", camera.position);
 	const glm::vec3  origin   = { 10.0f , 30.0f, -5.0f };
-	const std::vector<MassPoint>& massPoints = simulationManager.get_mass_points();
-	const std::vector<Spring>& springs = simulationManager.get_springs();
-
-	// for (const MassPoint& massPoint : massPoints)
-	// {
-	// 	model = glm::translate(glm::mat4(1.0f),origin + massPoint.position);
-	// 	model = glm::scale(model, glm::vec3(simulationManager.get_initial_length() * 0.25f));
-	// 	diffuse.set_mat4("model", model);
-	// 	draw_sphere(glm::vec3(1.0f));
-	// }
-	
-	for (const Spring& spring : springs)
-	{
-		add_line(massPoints[spring.indexA].position,
-				 massPoints[spring.indexB].position);
-	}
-
 	diffuse.set_mat4("model", glm::translate(glm::mat4(1.0f), origin));
-	draw_lines(glm::vec3(1.0f));
+
+	if (simulationManager.is_debug_mode())
+	{
+		const ClothData &cloth = simulationManager.get_cloth_data(0);
+		const Mesh &mesh = resourceManager.get_mesh_by_handle(cloth.simulatedMesh);
+
+		for (const glm::ivec2 &attachment : cloth.springAttachments)
+		{
+			add_line(mesh.positions[attachment.x],
+					 mesh.positions[attachment.y]);
+		}
+
+		draw_lines(glm::vec3(1.0f));
+	} else {
+		draw_model(resourceManager.get_model_by_name("Flag"), diffuse);
+	}
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	glfwSwapBuffers(&displayManager.get_window());
 }
 
-void SRenderManager::draw_model(const Model& model)
+void SRenderManager::draw_model(const Model& model, Shader &shader)
 {
 	SResourceManager& resourceManager = SResourceManager::get();
 
@@ -122,10 +123,13 @@ void SRenderManager::draw_model(const Model& model)
 		{
 			if (*textureHandle != Handle<Texture>::sNone)
 			{
-				//SPDLOG_INFO(magic_enum::enum_name(resourceManager.get_texture_by_handle(*textureHandle).type));
+				const Texture& texture = resourceManager.get_texture_by_handle(*textureHandle);
+				std::string type(magic_enum::enum_name(texture.type));
+				shader.set_int(type, j);
+				glActiveTexture(GL_TEXTURE0 + j);
+				glBindTexture(GL_TEXTURE_2D, texture.gpuId);
 			}
 		}
-		
 		
 		glBindVertexArray(mesh.gpuIds[0]);
         glDrawElements(GL_TRIANGLES, mesh.indexes.size(), GL_UNSIGNED_INT, 0);

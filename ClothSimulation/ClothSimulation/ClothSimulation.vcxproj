@@ -161,7 +161,6 @@
     <ClCompile Include="source\Common\shader.cpp" />
     <ClCompile Include="source\display_manager.cpp" />
     <ClCompile Include="source\input_manager.cpp" />
-    <ClCompile Include="source\mass_point.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.hpp</PrecompiledHeaderFile>
@@ -178,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Common\camera.hpp" />
+    <ClInclude Include="source\Common\cloth_data.hpp" />
     <ClInclude Include="source\Common\handle.hpp" />
     <ClInclude Include="source\Common\material.hpp" />
     <ClInclude Include="source\Common\mesh.hpp" />
@@ -187,7 +187,6 @@
     <ClInclude Include="source\display_manager.hpp" />
     <ClInclude Include="source\input_key.hpp" />
     <ClInclude Include="source\input_manager.hpp" />
-    <ClInclude Include="source\mass_point.hpp" />
     <ClInclude Include="source\pch.hpp" />
     <ClInclude Include="source\render_manager.hpp" />
     <ClInclude Include="source\resource_manager.hpp" />

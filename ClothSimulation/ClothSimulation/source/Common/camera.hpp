@@ -7,8 +7,8 @@ class Camera
 public:
 	glm::vec3 position{ 0.0f };
 	Float32 yaw{ 0.0f }, pitch{ 0.0f };
-	float  speed{ 10.0f };
-	Float32 sensitivity{ 2.0f };
+	float  speed{ 20.0f };
+	Float32 sensitivity{ 20.0f };
 
 	void initialize(const glm::vec3 &position);
 	void move_forward(Float32 dt);

@@ -6,9 +6,6 @@
 #include "source/resource_manager.hpp"
 #include "source/render_manager.hpp"
 #include "source/Common/camera.hpp"
-#include "source/Common/model.hpp"
-#include "source/Common/handle.hpp"
-#include "source/Common/mesh.hpp"
 
 void input_setup();
 void handle_camera(Camera& cam, float dt);
@@ -26,7 +23,6 @@ int main()
 	inputManager.startup();
 	renderManager.startup();
 	simulationManager.startup();
-
 	input_setup();
 
 	Camera camera;
@@ -53,9 +49,8 @@ int main()
 
 		inputManager.process_input();
 		displayManager.update();
-		simulationManager.update(deltaTimeMs);
-		renderManager.update(camera, deltaTimeMs);
-
+		simulationManager.update();
+		renderManager.update(camera);
 	}
 
 	simulationManager.shutdown();
