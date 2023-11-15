@@ -27,7 +27,7 @@ void SimulationManager::startup()
 
 
 	Material material;
-	material.albedo = resourceManager.load_texture(resourceManager.TEXTURES_PATH + "Silence/Albedo.png",
+	material.albedo = resourceManager.load_texture(resourceManager.TEXTURES_PATH + "Silence/Second.jpg",
 												   "SilenceAlbedo", ETextureType::Albedo);
 	resourceManager.create_material(material, "Silence");
 	Texture &albedo = resourceManager.get_texture_by_handle(material.albedo);
@@ -237,10 +237,9 @@ void SimulationManager::compute_external_forces(const ClothData &clothData)
 	{
 		const glm::vec3 gravityForce = clothData.masses[i] * gravity;
 		const glm::vec3 dampingForce = -damping * clothData.velocities[i];
-		glm::vec3 fluidForce(0.0f);
-			fluidForce = viscosity
-					   * glm::dot(normal, fluidVelocity - clothData.velocities[i])
-					   * normal;
+		glm::vec3 fluidForce = viscosity
+							 * glm::dot(normal, fluidVelocity - clothData.velocities[i])
+							 * normal;
 
 		externalForces[i] = gravityForce + dampingForce + fluidForce;
 	}
