@@ -27,7 +27,7 @@ void SimulationManager::startup()
 
 
 	Material material;
-	material.albedo = resourceManager.load_texture(resourceManager.TEXTURES_PATH + "Silence/Second.jpg",
+	material.albedo = resourceManager.load_texture(resourceManager.TEXTURES_PATH + "Silence/Albedo.png",
 												   "SilenceAlbedo", ETextureType::Albedo);
 	resourceManager.create_material(material, "Silence");
 	Texture &albedo = resourceManager.get_texture_by_handle(material.albedo);

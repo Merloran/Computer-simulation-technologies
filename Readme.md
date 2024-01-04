@@ -16,3 +16,7 @@
 	Reset button - reset flag state to begining
 	Debug mode - change view to spring only view
 	After pressing Escape key you can control camera with WSAD, Shift, Space and mouse
+	
+![Flag][flag]
+
+[flag]:          Screenshots/Flag.png
